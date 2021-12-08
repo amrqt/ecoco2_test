@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_NAME: $DB_NAME
+      POSTGRES_USER: $DB_USER
+      POSTGRES_PASSWORD: $DB_PASS
+    ports:
+      - "55432:5432"
+  
+  api:
+    image: co2_api
+    build: .
+    command: python manage.py migrate && python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    environment:
+      DB_NAME: $DB_NAME
+      DB_USER: $DB_USER
+      DB_PASS: $DB_PASS
+      SECRET_KEY: $SECRET_KEY
+      DATABASE_URL: postgresql://$DB_USER:$DB_PASS@db:5432/$DB_NAME
+      DEBUG: $DEBUG
+    depends_on:
+      - db
