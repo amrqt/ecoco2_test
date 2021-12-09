@@ -19,9 +19,18 @@ Eco CO2 technical test
 - **Docker** containers for database and Django services.
 
 ## Usage
+From the project root directory:
 1. Build and start Docker services
 ```
 docker-compose up
 ```
-2. Navigate to web server homepage
-http://localhost:8000
+2. Run initial migration and populate database
+```
+virtualenv .venv
+source .venv/bin/activate
+python manage.py migrate
+python manage.py populate_db
+```
+3. Navigate to table and chart pages
+http://localhost:8000/table
+http://localhost:8000/chart

@@ -4,6 +4,8 @@ from datetime import datetime
 import pandas as pd
 import numpy as np
 from django.shortcuts import HttpResponse
+from django.views.generic import TemplateView
+from chartjs.views.lines import BaseLineChartView
 
 from ecotest.ecodata.models import CO2DataModel
 
@@ -42,3 +44,34 @@ def CO2TableView(request):
     output_df = output_df.append(pd.Series({'co2_rate': source_weekend_mean, 'co2_rate_interpolated': interpolated_weekend_mean, 'difference': ''}, name='Weekend mean'))
 
     return HttpResponse(output_df.to_html())
+
+class CO2LineChartView(BaseLineChartView):
+    def get_labels(self):
+        """Return labels for the x-axis."""
+        return [str(i) for i in range(20)]
+
+    def get_providers(self):
+        """Return names of datasets."""
+        return ["co2_rate", "interpolated"]
+
+    def get_data(self):
+        """Return datasets to plot."""
+        co2data = CO2DataModel.objects.get(pk=1).data
+
+        source_df = pd.DataFrame.from_dict(co2data).tail(20)
+        source_df['datetime'] = pd.to_datetime(source_df.datetime)
+        source_df = source_df.set_index('datetime')
+
+        # Create a copy from source data, remove values for half hour rows
+        interpolated_df = source_df.copy()
+        interpolated_df[interpolated_df.index.minute == 30] = np.nan
+
+        # Fill missing data with linear interpolation
+        interpolated_df = interpolated_df.interpolate()
+
+
+        return [source_df.co2_rate.to_list(), interpolated_df.co2_rate.to_list()]
+
+
+line_chart = TemplateView.as_view(template_name='line_chart.html')
+line_chart_json = CO2LineChartView.as_view()

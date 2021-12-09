@@ -16,8 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from ecotest.ecodata.views import CO2TableView
+from ecotest.ecodata.views import CO2TableView, line_chart, line_chart_json
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', CO2TableView),
+    path('table', CO2TableView),
+    path('chart', line_chart, name='line_chart'),
+    path('chartJSON', line_chart_json, name='line_chart_json'),
 ]

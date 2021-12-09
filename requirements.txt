@@ -3,3 +3,4 @@ django-environ
 psycopg2
 requests
 pandas
+django-chartjs
